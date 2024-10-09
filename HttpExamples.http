@@ -1,0 +1,75 @@
+
+# ============== For Gatling Tests ==============
+### GET hello request to slow backend gateway
+GET http://localhost:8180/slow-service/hello?id=hello-slow-backend
+
+### GET hello request to fast backend gateway
+GET http://localhost:8180/fast-service/hello?id=hello-slow-backend
+
+# ================ Nested Routes ================
+
+### GET hello request to example backend service
+# Test nested routes
+# Expect X-Route-Nested-Response-Id, X-Route-Response-Id headers
+GET http://localhost:8180/backend-service/hello?id=test
+
+### GET actuator request to example backend service
+# Test nested routes
+# Expect X-Route-Response-Id header
+GET http://localhost:8180/backend-service/actuator
+
+# ======== Custom filters and predicates ==========
+
+### GET hello request to example java config custom filters
+# Test custom predicate
+# Header X-Custom-Header not exist
+# Get 404 route error
+GET http://localhost:8180/custom-java/hello?id=test
+
+### GET hello request to example java config custom filters
+# Header X-Custom-Header is exist
+# Expect request in backend with headers:
+# x-header-1: (uuid)
+# x-header-21: (uuid)
+# x-header-22: (uuid)
+# x-header-3: (uuid), (uuid)
+GET http://localhost:8180/custom-java/hello?id=test
+X-Custom-Header: 123456
+
+### GET hello request to example yml config custom filters
+# Test custom predicate
+# Header X-Custom-Header not exist
+# Get 404 route error
+GET http://localhost:8180/custom-yml/hello?id=test
+
+### GET hello request to example yml config custom filters
+# Header X-Custom-Header is exist
+# Expect request in backend with headers:
+# x-header-1: (uuid)
+# x-header-21: (uuid)
+# x-header-22: (uuid)
+GET http://localhost:8180/custom-yml/hello?id=test
+X-Custom-Header: 123456
+
+
+# ================ Handling Errors ================
+
+### GET hello request with error in proxied service
+# This example shows, that responses proxied from service without handling
+# Expect validation error, Bad Request
+GET http://localhost:8180/backend-service/hello
+
+### GET request for bad endpoint
+# Dispatcher servlet throw error
+# Watch @ControllerAdvice work in logs
+POST http://localhost:8180/has-not-route
+
+### GET request with error in filter.
+# Example shows, that function onError NOT WORKING!
+# Handler must return http-code 501, but return 500
+GET http://localhost:8180/on-error/hello?id=test
+
+### GET request with error handling gateway exceptions
+# Handling error filter return error-code 418
+GET http://localhost:8180/error-handling/hello?id=test
+

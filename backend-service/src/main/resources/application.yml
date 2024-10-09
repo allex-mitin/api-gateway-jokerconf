@@ -1,0 +1,41 @@
+server:
+  tomcat:
+    threads:
+      max: ${TOMCAT_THREADS_MAX:200}
+      min-spare: ${TOMCAT_THREADS_MAX:200}
+
+
+spring:
+  application:
+    name: backend-service
+
+delay: ${RESPONSE_DELAY:0}
+
+logbook:
+  format:
+    style: http
+  predicate:
+    exclude:
+      - path: /
+      - path: /favicon.ico
+      - path: /webjars/
+      - path: /swagger-ui**
+      - path: /v3/api-docs
+      - path: /swagger-resources/**
+      - path: /actuator/**
+
+logging:
+  level:
+    root: INFO
+    org.zalando.logbook: TRACE
+
+management:
+  endpoint:
+    health:
+      show-details: always
+  endpoints:
+    web:
+      exposure:
+        include: health, info, metrics, prometheus, env
+
+

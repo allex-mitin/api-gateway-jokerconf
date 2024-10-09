@@ -1,0 +1,85 @@
+version: '3.9'
+
+services:
+
+  api-gateway-mvc:
+    build:
+      context: ./api-gateway-mvc
+    container_name: api-gateway-mvc
+    environment:
+      FAST_SERVICE_URL: http://fast-backend-service:8080
+      SLOW_SERVICE_URL: http://slow-backend-service:8080
+      BACKEND_SERVICE_URL: http://backend-service:8080
+      THREADS_VIRTUAL_ENABLED: true
+      HTTP_CLIENT_TYPE: JDK
+    ports:
+      - "8180:8080"
+    networks:
+      - jokerconf
+
+  fast-backend-service:
+    build:
+      context: ./backend-service
+    container_name: fast-backend-service
+    environment:
+      RESPONSE_DELAY: 50
+      TOMCAT_THREADS_MAX: 400
+    ports:
+      - "8181:8080"
+    networks:
+      - jokerconf
+
+  slow-backend-service:
+    build:
+      context: ./backend-service
+    container_name: slow-backend-service
+    environment:
+      RESPONSE_DELAY: 5000
+      TOMCAT_THREADS_MAX: 400
+    ports:
+      - "8182:8080"
+    networks:
+      - jokerconf
+
+  backend-service:
+    build:
+      context: ./backend-service
+    container_name: backend-service
+    environment:
+      RESPONSE_DELAY: 0
+    ports:
+      - "8183:8080"
+    networks:
+      - jokerconf
+
+  grafana:
+    image: grafana/grafana
+    networks:
+      - jokerconf
+    container_name: grafana
+    depends_on:
+      - prometheus
+    environment:
+      - GF_AUTH_ANONYMOUS_ENABLED=true
+      - GF_AUTH_ANONYMOUS_ORG_ROLE=Admin
+      - GF_AUTH_DISABLE_LOGIN_FORM=true
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./infra/grafana/storage:/var/lib/grafana
+      - ./infra/grafana/dashboards:/etc/grafana/provisioning/dashboards
+      - ./infra/grafana/datasource.yml:/etc/grafana/provisioning/datasources/datasource.yml
+
+  prometheus:
+    image: prom/prometheus
+    networks:
+      - jokerconf
+    container_name: prometheus
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./infra/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
+
+
+networks:
+  jokerconf:

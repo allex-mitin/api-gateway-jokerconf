@@ -1,0 +1,11 @@
+server:
+  port: 8082
+  tomcat:
+    threads:
+      max: 400
+      min-spare: 400
+    connection-timeout: 10s
+
+
+
+

@@ -1,0 +1,6 @@
+org.springframework.cloud.gateway.server.mvc.filter.FilterSupplier=\
+    com.jokerconf.gateway.mvc.filter.CustomFilterFunctions.FilterSupplier, \
+    com.jokerconf.gateway.mvc.filter.ErrorFilterFunctions.FilterSupplier
+
+org.springframework.cloud.gateway.server.mvc.predicate.PredicateSupplier=\
+  com.jokerconf.gateway.mvc.predicate.CustomPredicateFunctions.CustomPredicateSupplier

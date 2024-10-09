@@ -1,0 +1,6 @@
+server:
+  port: 8080
+
+fast-service-url: http://localhost:8082
+slow-service-url: http://localhost:8082
+backend-service-url: http://localhost:8082

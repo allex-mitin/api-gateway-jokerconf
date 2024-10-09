@@ -1,0 +1,85 @@
+spring:
+  application:
+    name: api-gateway-mvc
+  cloud:
+    gateway:
+      mvc:
+        http-client:
+          connect-timeout: ${GATEWAY_HTTP_CLIENT_CONNECTION_TIMEOUT:60000}
+          read-timeout: ${GATEWAY_HTTP_CLIENT_READ_TIMEOUT:60000}
+          type: jdk
+        routes:
+          - id: custom-filter-yml-config-route
+            uri: ${backend-service-url}
+            predicates:
+              - Method=GET
+              - Path=/custom-yml/hello
+              - HeaderExist=X-Custom-Header
+            filters:
+              - RewritePath=/custom-yml/hello, /hello
+              - AddRequestHeaderUUID=X-HEADER-1
+#              - AddRequestHeadersUUID=X-HEADER-21, X-HEADER-22     NOT WORKING!
+              - name: AddRequestHeadersUUID
+                args:
+                  headers: X-HEADER-21, X-HEADER-22
+#              - name: AddRequestHeaderUUIDValues   NOT WORKING!
+#                args:
+#                  header: X-HEADER-3
+#                  count: 2
+
+# Default configuration from documentation, not working:
+#          - id: backend-yml-route
+#            uri: ${backend-service-url}
+#            predicates:
+#              - Path=/backend-yml/**
+#            filters:
+#              - RewritePath=/backend-yml/?(?<segment>.*), /$\{segment}
+#              - AddRequestHeadersIfNotPresent=X-Request-Color-1:blue,X-Request-Color-2:green
+#              - name: Retry
+#                args:
+#                  - retries: 5
+#                  - statuses: INTERNAL_SERVER_ERROR
+#                  - methods: GET
+
+
+  #Property to enable virtual threads in Spring
+  threads:
+    virtual:
+      enabled: ${THREADS_VIRTUAL_ENABLED:false}
+
+
+
+#Proxied services urls
+backend-service-url: ${BACKEND_SERVICE_URL:http://localhost:8082}
+fast-service-url: ${FAST_SERVICE_URL:http://localhost:8082}
+slow-service-url: ${SLOW_SERVICE_URL:http://localhost:8082}
+
+#Manual set gateway http client with bean. Possible values: JDK, APACHE, SIMPLE
+client-type: ${HTTP_CLIENT_TYPE:JDK}
+
+#Using gateway swagger as swagger for all services
+springdoc:
+  api-docs:
+    enabled: true
+    groups.enabled: true
+  swagger-ui:
+    config-url: /v3/api-docs/swagger-config
+    url: /v3/api-docs
+    urls:
+      - name: slow-service
+        url: /slow-service/v3/api-docs
+      - name: fast-service
+        url: /fast-service/v3/api-docs
+      - name: backend-service
+        url: /backend-service/v3/api-docs
+
+
+logging:
+  level:
+    org.springframework: INFO
+    root: INFO
+
+management:
+  endpoint:
+    health:
+      show-details: always
